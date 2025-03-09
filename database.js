@@ -1,10 +1,9 @@
 require("dotenv").config();
 const mysql = require("mysql2");
-console.log("SQLPASSWORD:", process.env.SQLPASSWORD);
 // Create a MySQL connection
 const connection = mysql.createConnection({
   host: "127.0.0.1", 
-  user: "root",      
+  user: process.env.DB_USER,      
   password: process.env.SQLPASSWORD, 
 });
 
@@ -32,15 +31,20 @@ connection.connect((err) => {
           name VARCHAR(255) NOT NULL,
           address VARCHAR(255) NOT NULL,
           latitude FLOAT NOT NULL,
-          longitude FLOAT NOT NULL
+          longitude FLOAT NOT NULL,
+          UNIQUE (latitude, longitude)
         )
       `;
 
       connection.query(createTableQuery, (err) => {
-        if (err) throw err;
+        if (err) {
+          console.error("Error creating schools table:", err);
+          return;
+        }
         console.log("Schools table created or already exists");
-        connection.end(); 
       });
     });
   });
 });
+
+module.exports = connection;
